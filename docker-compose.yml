@@ -1,0 +1,68 @@
+version: "3"
+
+services:
+
+  employee:
+    image: employee:latest
+# Skip container_name to auto scale service instances
+    container_name: employee
+    build: employee
+    ports:
+      - "8080"
+    networks:
+        - demonet
+    links:
+      - mongodb
+
+# Sample HAProxy to LoadBalance (lb) for multiple instance of a service
+# Note: Unfortunately this is not working.  Potential issue DockerCompose version 3 is not supported by HAProxy project.  This project is in maintenance status now. :-(
+#  lb_employee:
+#    image: dockercloud/haproxy:latest
+#    networks:
+#      - demonet
+#    links:
+#      - employee
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    ports:
+#      - "8080:8080"
+
+  reward:
+    image: reward:latest
+    container_name: reward
+    build: reward
+    ports:
+      - "8080"
+    networks:
+        - demonet
+    links:
+      - mongodb
+
+  mission:
+    image: mission:latest
+    container_name: mission
+    build: mission
+    ports:
+      - "8080"
+    networks:
+        - demonet
+    links:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+        - ./db:/data/db
+    restart: always
+    networks:
+        demonet:
+          aliases:
+            - "mongodb"
+
+networks:
+  demonet:
+    driver: bridge
+
